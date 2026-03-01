@@ -18,18 +18,18 @@ export interface Branch {
   id: string
   name: string
   code: string
-  isActive: boolean
-  createdAt: string
+  is_active: boolean
+  created_at: string
 }
 
 export type DockStatus = 'AVAILABLE' | 'OCCUPIED' | 'BLOCKED_PENDING' | 'BLOCKED'
 
 export interface Dock {
   id: string
-  branchId: string
+  branch_id: string
   name: string
   status: DockStatus
-  createdAt: string
+  created_at: string
 }
 
 export type OperationalStatus =
@@ -44,63 +44,68 @@ export type OperationalStatus =
 
 export type BusinessStatus = 'ACTIVE' | 'CANCELED'
 
+export const SOURCE_LABELS: Record<string, string> = {
+  PLANNING: 'Partner (Planning)',
+  manual: 'Internal',
+}
+
 export interface Transport {
   id: string
-  branchId: string
-  sourceSystem: 'PLANNING' | 'manual'
-  externalReference: string | null
-  operationalStatus: OperationalStatus
-  businessStatus: BusinessStatus
-  assignedDockId: string | null
-  suggestedDockId: string | null
-  queuePosition: number | null
-  etaPlannedAt: string | null
-  arrivedAt: string | null
-  waitingAt: string | null
-  inProcessAt: string | null
-  readyAt: string | null
-  completedAt: string | null
-  createdAt: string
-  updatedAt: string
+  branch_id: string
+  source_system: 'PLANNING' | 'manual'
+  external_reference: string | null
+  operational_status: OperationalStatus
+  business_status: BusinessStatus
+  assigned_dock_id: string | null
+  suggested_dock_id: string | null
+  queue_position: number | null
+  eta_planned_at: string | null
+  arrived_at: string | null
+  waiting_at: string | null
+  in_process_at: string | null
+  ready_at: string | null
+  completed_at: string | null
+  created_at: string
+  updated_at: string
 }
 
 export interface TransportItem {
   id: string
-  transportId: string
-  referenceType: 'CMR' | 'ORDER' | 'OTHER'
-  referenceValue: string
-  expectedQty: number | null
-  declaredQty: number | null
-  unloadedQty: number | null
+  transport_id: string
+  reference_type: 'CMR' | 'ORDER' | 'OTHER'
+  reference_value: string
+  expected_qty: number | null
+  declared_qty: number | null
+  unloaded_qty: number | null
   comment: string | null
-  isActive: boolean
+  is_active: boolean
 }
 
 export interface StatusHistoryEntry {
   id: string
-  transportId: string
-  fromStatus: string | null
-  toStatus: string
-  changedByUserId: string | null
-  changedBySystem: boolean
+  transport_id: string
+  from_status: string | null
+  to_status: string
+  changed_by_user_id: string | null
+  changed_by_system: boolean
   reason: string | null
-  createdAt: string
+  created_at: string
 }
 
 export interface TransportDetail extends Transport {
   items: TransportItem[]
-  history: StatusHistoryEntry[]
+  status_history: StatusHistoryEntry[]
   durations: Record<string, number>
 }
 
 export interface DockAssignment {
   id: string
-  dockId: string
-  transportId: string
+  dock_id: string
+  transport_id: string
   mode: 'ASSIGNED' | 'QUEUED'
   position: number | null
-  createdAt: string
-  endedAt: string | null
+  created_at: string
+  ended_at: string | null
 }
 
 export interface ApiResponse<T> {

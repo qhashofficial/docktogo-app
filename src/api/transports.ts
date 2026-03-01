@@ -48,3 +48,35 @@ export function updateQuantities(
     },
   )
 }
+
+export function updateTransport(
+  transportId: string,
+  branchId: string,
+  data: { suggested_dock_id?: string },
+) {
+  return api<ApiResponse<Transport>>(
+    `/api/v1/transports/${transportId}?branchId=${branchId}`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    },
+  )
+}
+
+export interface IngestPayload {
+  branchId: string
+  externalReference: string
+  etaPlannedAt?: string
+  businessStatus?: string
+  items?: { referenceType: string; referenceValue: string; expectedQty?: number }[]
+}
+
+export function ingestTransport(payload: IngestPayload) {
+  return api<ApiResponse<{ transportId: string; skipped?: boolean }>>(
+    '/api/v1/transports/ingest',
+    {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    },
+  )
+}

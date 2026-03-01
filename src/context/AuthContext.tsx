@@ -16,6 +16,7 @@ interface AuthState {
   loading: boolean
   login: (email: string, password: string) => Promise<void>
   logout: () => Promise<void>
+  refreshUser: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthState | null>(null)
@@ -55,8 +56,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setPermissions([])
   }, [])
 
+  const refreshUser = useCallback(async () => {
+    try {
+      const res = await authApi.refreshSession()
+      setAccessToken(res.data.access_token)
+      setUser(res.data.profile)
+      setPermissions(res.data.permissions)
+    } catch { /* swallow */ }
+  }, [])
+
   return (
-    <AuthContext.Provider value={{ user, permissions, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, permissions, loading, login, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   )

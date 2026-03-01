@@ -29,14 +29,16 @@ type BadgeVariant =
   | { kind: 'business'; status: BusinessStatus }
 
 export default function StatusBadge(props: BadgeVariant) {
+  if (!props.status) return null
+
   const style =
     props.kind === 'operational'
-      ? OP_STYLES[props.status]
+      ? OP_STYLES[props.status] ?? ''
       : props.kind === 'dock'
-        ? DOCK_STYLES[props.status]
-        : BIZ_STYLES[props.status]
+        ? DOCK_STYLES[props.status] ?? ''
+        : BIZ_STYLES[props.status] ?? ''
 
-  const label = props.status.replace(/_/g, ' ')
+  const label = String(props.status).replace(/_/g, ' ')
 
   return (
     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide ${style}`}>
