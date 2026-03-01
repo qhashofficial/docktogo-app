@@ -2,9 +2,6 @@ import { useEffect, useState, useMemo } from 'react'
 import {
   Container,
   Truck,
-  Clock,
-  CheckCircle2,
-  ArrowUpRight,
   ArrowRight,
   AlertTriangle,
   Users,
@@ -13,8 +10,6 @@ import {
   CalendarClock,
   Timer,
   BarChart3,
-  Activity,
-  ArrowDownRight,
   Signal,
   Gauge,
 } from 'lucide-react'
@@ -210,38 +205,6 @@ export default function DashboardPage() {
           <Signal className="w-4 h-4 text-txt-muted group-hover:text-primary transition-colors" />
           Branches
         </button>
-      </div>
-
-      {/* Stats Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-        {[
-          { label: 'Transports', value: activeTransports.length, icon: Truck, color: 'text-primary', bg: 'bg-primary-soft', trend: '+12%', up: true },
-          { label: 'Active Docks', value: activeDocks, icon: Container, color: 'text-accent', bg: 'bg-accent-soft', trend: `${docks.length} total`, up: true },
-          { label: 'In Process', value: inProcess, icon: Activity, color: 'text-orange-500', bg: 'bg-orange-50', trend: null, up: true },
-          { label: 'Waiting', value: waiting, icon: Clock, color: 'text-warning', bg: 'bg-warning-soft', trend: null, up: false },
-          { label: 'Completed', value: completed, icon: CheckCircle2, color: 'text-accent-dark', bg: 'bg-accent-soft', trend: 'today', up: true },
-          { label: 'Blocked', value: blockedDocks, icon: AlertTriangle, color: 'text-danger', bg: 'bg-danger-soft', trend: null, up: false },
-        ].map((stat, i) => (
-          <div key={stat.label}
-            className="bg-card rounded-2xl border border-edge p-4 hover:shadow-md hover:shadow-black/[0.03] transition-all duration-200 animate-slide-up"
-            style={{ animationDelay: `${i * 60}ms` }}>
-            <div className="flex items-center justify-between mb-3">
-              <div className={`w-9 h-9 rounded-xl ${stat.bg} flex items-center justify-center`}>
-                <stat.icon className={`w-4 h-4 ${stat.color}`} />
-              </div>
-              {stat.trend && (
-                <span className={`inline-flex items-center gap-0.5 text-[10px] font-semibold ${stat.up ? 'text-accent' : 'text-danger'}`}>
-                  {stat.up ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                  {stat.trend}
-                </span>
-              )}
-            </div>
-            <p className="font-display text-2xl font-bold text-txt tracking-tight animate-count-up">
-              {loading ? <span className="inline-block w-10 h-7 bg-page rounded-lg animate-pulse" /> : stat.value}
-            </p>
-            <p className="text-[11px] text-txt-dim mt-0.5">{stat.label}</p>
-          </div>
-        ))}
       </div>
 
       {/* Main Grid */}
