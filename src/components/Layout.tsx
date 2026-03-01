@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard,
   Container,
@@ -8,54 +8,48 @@ import {
   LogOut,
   User,
   Building2,
+  Settings,
+  ChevronRight,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useBranch } from '../context/BranchContext'
 import { ROLE_LABELS } from '../types'
 
 const NAV_ITEMS = [
-  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/dashboard', icon: LayoutDashboard, label: 'Overview' },
   { to: '/docks', icon: Container, label: 'Dock Management' },
   { to: '/transports', icon: Truck, label: 'Transports' },
 ]
+
+const PAGE_TITLES: Record<string, string> = {
+  '/dashboard': 'Overview',
+  '/docks': 'Dock Management',
+  '/transports': 'Transports',
+}
 
 function SidebarLink({
   to,
   icon: Icon,
   label,
-  expanded,
 }: {
   to: string
   icon: typeof LayoutDashboard
   label: string
-  expanded: boolean
 }) {
   return (
     <NavLink
       to={to}
       className={({ isActive }) =>
-        `group relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
+        `flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group ${
           isActive
-            ? 'bg-brand/10 text-brand'
-            : 'text-txt-dim hover:text-txt hover:bg-raised'
+            ? 'bg-primary text-white shadow-md shadow-primary/25'
+            : 'text-txt-dim hover:bg-page hover:text-txt'
         }`
       }
     >
-      {({ isActive }) => (
-        <>
-          {isActive && (
-            <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-brand rounded-r-full" />
-          )}
-          <Icon className="w-5 h-5 shrink-0" />
-          <span
-            className={`text-sm font-medium whitespace-nowrap transition-all duration-200 ${
-              expanded ? 'opacity-100 w-auto' : 'opacity-0 w-0 overflow-hidden'
-            }`}
-          >
-            {label}
-          </span>
-        </>
-      )}
+      <Icon className="w-[18px] h-[18px]" />
+      <span className="flex-1">{label}</span>
+      <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-40 transition-opacity" />
     </NavLink>
   )
 }
@@ -64,7 +58,7 @@ export default function Layout() {
   const { user, logout } = useAuth()
   const { branches, activeBranch, setBranch } = useBranch()
   const navigate = useNavigate()
-  const [sidebarExpanded, setSidebarExpanded] = useState(false)
+  const location = useLocation()
   const [branchOpen, setBranchOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
 
@@ -82,142 +76,153 @@ export default function Layout() {
         .slice(0, 2)
     : user?.email?.slice(0, 2).toUpperCase() ?? '??'
 
+  const pageTitle = PAGE_TITLES[location.pathname] || 'DockToGo'
+
   return (
-    <div className="min-h-screen bg-void flex">
-      {/* Sidebar */}
-      <aside
-        onMouseEnter={() => setSidebarExpanded(true)}
-        onMouseLeave={() => setSidebarExpanded(false)}
-        className={`fixed top-0 left-0 h-full z-40 bg-panel border-r border-edge flex flex-col transition-all duration-300 ease-out ${
-          sidebarExpanded ? 'w-56' : 'w-16'
-        }`}
-      >
-        {/* Logo */}
-        <div className="h-16 flex items-center px-3 gap-2.5 border-b border-edge shrink-0">
-          <div className="w-9 h-9 rounded-lg bg-brand/15 flex items-center justify-center shrink-0">
-            <Container className="w-5 h-5 text-brand" />
+    <div className="min-h-screen bg-page flex">
+      {/* Sidebar — always expanded */}
+      <aside className="fixed top-0 left-0 h-full w-60 bg-sidebar border-r border-edge flex flex-col z-40">
+        {/* Brand */}
+        <div className="h-16 flex items-center px-5 gap-3 border-b border-edge shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+            <Container className="w-4 h-4 text-white" />
           </div>
-          <span
-            className={`font-display text-xl font-bold tracking-tight text-txt transition-all duration-200 ${
-              sidebarExpanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden'
-            }`}
-          >
-            DTG
-          </span>
+          <div>
+            <span className="font-display text-base font-bold text-txt tracking-tight">
+              DockToGo
+            </span>
+            <span className="block text-[10px] text-txt-muted font-medium -mt-0.5">
+              Management
+            </span>
+          </div>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 p-2 space-y-1 mt-2">
+        {/* Nav */}
+        <nav className="flex-1 px-3 py-4 space-y-1">
           {NAV_ITEMS.map((item) => (
-            <SidebarLink key={item.to} expanded={sidebarExpanded} {...item} />
+            <SidebarLink key={item.to} {...item} />
           ))}
+
+          <div className="h-px bg-edge my-4" />
+
+          <NavLink
+            to="/settings"
+            className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-txt-dim hover:bg-page hover:text-txt transition-all"
+          >
+            <Settings className="w-[18px] h-[18px]" />
+            <span>Settings</span>
+          </NavLink>
         </nav>
 
-        {/* User section */}
-        <div className="p-2 border-t border-edge">
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-txt-dim hover:text-status-canceled hover:bg-status-canceled/10 transition-all"
-          >
-            <LogOut className="w-5 h-5 shrink-0" />
-            <span
-              className={`text-sm font-medium transition-all duration-200 ${
-                sidebarExpanded ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden'
-              }`}
+        {/* User card */}
+        <div className="px-3 pb-4">
+          <div className="flex items-center gap-3 px-3 py-3 rounded-xl bg-page">
+            <div className="w-9 h-9 rounded-full bg-primary-soft flex items-center justify-center">
+              <span className="text-xs font-bold text-primary">{initials}</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-txt truncate leading-tight">
+                {user?.displayName || user?.email?.split('@')[0]}
+              </p>
+              <p className="text-[11px] text-txt-muted truncate leading-tight">
+                {ROLE_LABELS[user?.roleType ?? 1]}
+              </p>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="p-1.5 rounded-lg text-txt-muted hover:text-danger hover:bg-danger-soft transition-colors"
             >
-              Logout
-            </span>
-          </button>
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </aside>
 
       {/* Main area */}
-      <div className="flex-1 ml-16">
+      <div className="flex-1 ml-60">
         {/* Top bar */}
-        <header className="h-16 bg-panel/80 backdrop-blur-xl border-b border-edge flex items-center justify-between px-6 sticky top-0 z-30">
-          {/* Branch picker */}
-          <div className="relative">
-            <button
-              onClick={() => setBranchOpen(!branchOpen)}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-raised border border-edge hover:border-edge-bright transition-colors"
-            >
-              <Building2 className="w-4 h-4 text-brand" />
-              <span className="text-sm font-medium text-txt">
-                {activeBranch?.name ?? 'Select branch'}
-              </span>
-              <ChevronDown className="w-3.5 h-3.5 text-txt-muted" />
-            </button>
+        <header className="h-16 bg-card/80 backdrop-blur-sm border-b border-edge flex items-center justify-between px-8 sticky top-0 z-30">
+          <h1 className="font-display text-xl font-semibold text-txt">{pageTitle}</h1>
 
-            {branchOpen && (
-              <div className="absolute top-full left-0 mt-2 w-56 bg-elevated border border-edge rounded-xl shadow-2xl shadow-black/50 py-1 animate-slide-up">
-                {branches.map((b) => (
-                  <button
-                    key={b.id}
-                    onClick={() => {
-                      setBranch(b)
-                      setBranchOpen(false)
-                    }}
-                    className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
-                      b.id === activeBranch?.id
-                        ? 'bg-brand/10 text-brand'
-                        : 'text-txt-dim hover:text-txt hover:bg-raised'
-                    }`}
-                  >
-                    <span className="font-medium">{b.name}</span>
-                    <span className="ml-2 text-xs font-mono text-txt-muted">{b.code}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          <div className="flex items-center gap-3">
+            {/* Branch picker */}
+            <div className="relative">
+              <button
+                onClick={() => setBranchOpen(!branchOpen)}
+                className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-page border border-edge hover:border-edge-strong transition-colors text-sm"
+              >
+                <Building2 className="w-4 h-4 text-primary" />
+                <span className="font-medium text-txt-body">
+                  {activeBranch?.name ?? 'Select branch'}
+                </span>
+                <ChevronDown className="w-3.5 h-3.5 text-txt-muted" />
+              </button>
 
-          {/* User info */}
-          <div className="relative">
-            <button
-              onClick={() => setUserMenuOpen(!userMenuOpen)}
-              className="flex items-center gap-3 px-2 py-1 rounded-lg hover:bg-raised transition-colors"
-            >
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-medium text-txt leading-tight">
-                  {user?.displayName || user?.email}
-                </p>
-                <p className="text-xs text-txt-muted leading-tight">
-                  {ROLE_LABELS[user?.roleType ?? 1]}
-                </p>
-              </div>
-              <div className="w-9 h-9 rounded-lg bg-brand/15 flex items-center justify-center">
-                <span className="text-xs font-bold text-brand">{initials}</span>
-              </div>
-            </button>
-
-            {userMenuOpen && (
-              <div className="absolute top-full right-0 mt-2 w-48 bg-elevated border border-edge rounded-xl shadow-2xl shadow-black/50 py-1 animate-slide-up">
-                <div className="px-4 py-3 border-b border-edge">
-                  <p className="text-sm font-medium text-txt truncate">{user?.email}</p>
+              {branchOpen && (
+                <div className="absolute top-full right-0 mt-2 w-56 bg-card border border-edge rounded-xl shadow-lg shadow-black/5 py-1 animate-slide-up z-50">
+                  {branches.map((b) => (
+                    <button
+                      key={b.id}
+                      onClick={() => {
+                        setBranch(b)
+                        setBranchOpen(false)
+                      }}
+                      className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
+                        b.id === activeBranch?.id
+                          ? 'bg-primary-soft text-primary font-medium'
+                          : 'text-txt-dim hover:bg-page hover:text-txt'
+                      }`}
+                    >
+                      {b.name}
+                      <span className="ml-2 text-xs font-mono text-txt-muted">{b.code}</span>
+                    </button>
+                  ))}
                 </div>
-                <button className="w-full text-left px-4 py-2.5 text-sm text-txt-dim hover:text-txt hover:bg-raised flex items-center gap-2">
-                  <User className="w-4 h-4" />
-                  Profile
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className="w-full text-left px-4 py-2.5 text-sm text-status-canceled hover:bg-status-canceled/10 flex items-center gap-2"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Logout
-                </button>
-              </div>
-            )}
+              )}
+            </div>
+
+            {/* User avatar */}
+            <div className="relative">
+              <button
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className="flex items-center gap-2 p-1 rounded-xl hover:bg-page transition-colors"
+              >
+                <div className="w-9 h-9 rounded-full bg-primary-soft flex items-center justify-center">
+                  <span className="text-xs font-bold text-primary">{initials}</span>
+                </div>
+                <ChevronDown className="w-3.5 h-3.5 text-txt-muted" />
+              </button>
+
+              {userMenuOpen && (
+                <div className="absolute top-full right-0 mt-2 w-52 bg-card border border-edge rounded-xl shadow-lg shadow-black/5 py-1 animate-slide-up z-50">
+                  <div className="px-4 py-3 border-b border-edge">
+                    <p className="text-sm font-medium text-txt truncate">{user?.email}</p>
+                    <p className="text-xs text-txt-muted">{ROLE_LABELS[user?.roleType ?? 1]}</p>
+                  </div>
+                  <button className="w-full text-left px-4 py-2.5 text-sm text-txt-dim hover:bg-page hover:text-txt flex items-center gap-2 transition-colors">
+                    <User className="w-4 h-4" />
+                    Profile
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2.5 text-sm text-danger hover:bg-danger-soft flex items-center gap-2 transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 
-        {/* Page content */}
-        <main className="p-6">
+        {/* Content */}
+        <main className="p-8">
           <Outlet />
         </main>
       </div>
 
-      {/* Overlay to close dropdowns */}
+      {/* Click-away overlay */}
       {(branchOpen || userMenuOpen) && (
         <div
           className="fixed inset-0 z-20"

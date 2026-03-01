@@ -2,10 +2,8 @@ import { useEffect, useState } from 'react'
 import {
   Truck,
   Search,
-  Filter,
   AlertTriangle,
   Loader2,
-  ExternalLink,
   Clock,
 } from 'lucide-react'
 import { useBranch } from '../../context/BranchContext'
@@ -13,7 +11,7 @@ import { getTransports } from '../../api/transports'
 import StatusBadge from '../../components/StatusBadge'
 import type { Transport, OperationalStatus } from '../../types'
 
-const OP_STATUS_OPTIONS: (OperationalStatus | 'ALL')[] = [
+const STATUS_FILTERS: (OperationalStatus | 'ALL')[] = [
   'ALL',
   'PLANNED',
   'ARRIVING',
@@ -66,9 +64,9 @@ export default function TransportsPage() {
 
   if (!activeBranch) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center animate-fade-in">
-          <AlertTriangle className="w-8 h-8 text-brand mx-auto mb-3" />
+      <div className="flex items-center justify-center h-64 animate-fade-in">
+        <div className="text-center">
+          <AlertTriangle className="w-8 h-8 text-warning mx-auto mb-3" />
           <p className="text-txt-dim text-sm">Select a branch to view transports</p>
         </div>
       </div>
@@ -77,42 +75,28 @@ export default function TransportsPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Header */}
-      <div>
-        <h1 className="font-display text-3xl font-bold tracking-tight text-txt uppercase">
-          Transports
-        </h1>
-        <p className="text-txt-dim text-sm mt-1">
-          {filtered.length} transport{filtered.length !== 1 ? 's' : ''} in{' '}
-          <span className="text-brand font-medium">{activeBranch.name}</span>
-        </p>
-      </div>
-
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        {/* Search */}
-        <div className="relative flex-1 max-w-md">
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-txt-muted" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by reference, ID..."
-            className="w-full pl-10 pr-4 py-2.5 bg-panel border border-edge rounded-xl text-sm text-txt placeholder:text-txt-muted focus:outline-none focus:border-brand/60 focus:ring-1 focus:ring-brand/20 transition-all"
+            placeholder="Search transports..."
+            className="w-full pl-10 pr-4 py-2.5 bg-card border border-edge rounded-xl text-sm text-txt placeholder:text-txt-placeholder focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all"
           />
         </div>
 
-        {/* Status filter pills */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
-          <Filter className="w-4 h-4 text-txt-muted shrink-0" />
-          {OP_STATUS_OPTIONS.map((status) => (
+          {STATUS_FILTERS.map((status) => (
             <button
               key={status}
               onClick={() => setStatusFilter(status)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
                 statusFilter === status
-                  ? 'bg-brand/15 text-brand border border-brand/30'
-                  : 'bg-raised border border-edge text-txt-dim hover:text-txt hover:border-edge-bright'
+                  ? 'bg-primary text-white shadow-sm shadow-primary/20'
+                  : 'bg-card border border-edge text-txt-dim hover:text-txt hover:border-edge-strong'
               }`}
             >
               {status === 'ALL' ? 'All' : status.replace(/_/g, ' ')}
@@ -121,84 +105,61 @@ export default function TransportsPage() {
         </div>
       </div>
 
-      {/* Transport list */}
+      {/* Table */}
       {loading ? (
         <div className="flex items-center justify-center h-48">
-          <Loader2 className="w-6 h-6 text-brand animate-spin" />
+          <Loader2 className="w-6 h-6 text-primary animate-spin" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-48 text-txt-muted">
-          <Truck className="w-10 h-10 mb-3 opacity-30" />
-          <p className="text-sm">No transports found</p>
+        <div className="bg-card rounded-2xl border border-edge p-16 text-center">
+          <Truck className="w-10 h-10 text-txt-placeholder mx-auto mb-3" />
+          <p className="text-txt-dim text-sm">No transports found</p>
         </div>
       ) : (
-        <div className="bg-panel border border-edge rounded-xl overflow-hidden">
-          {/* Table header */}
-          <div className="grid grid-cols-[1fr_120px_100px_120px_100px_80px] gap-4 px-5 py-3 border-b border-edge text-[11px] font-semibold text-txt-muted uppercase tracking-wider">
-            <span>Transport</span>
+        <div className="bg-card rounded-2xl border border-edge overflow-hidden">
+          {/* Header */}
+          <div className="grid grid-cols-[1fr_110px_90px_100px_90px_80px] gap-4 px-6 py-3.5 border-b border-edge text-[11px] font-semibold text-txt-muted uppercase tracking-wider">
+            <span>Name</span>
             <span>Status</span>
             <span>Business</span>
             <span>Source</span>
             <span>Updated</span>
-            <span className="text-right">Dock</span>
+            <span className="text-right">Actions</span>
           </div>
 
-          {/* Rows */}
           <div className="divide-y divide-edge">
-            {filtered.map((t, i) => (
+            {filtered.map((t) => (
               <div
                 key={t.id}
-                className="grid grid-cols-[1fr_120px_100px_120px_100px_80px] gap-4 px-5 py-3.5 hover:bg-raised/50 transition-colors cursor-pointer group items-center"
-                style={{ animationDelay: `${i * 30}ms` }}
+                className="grid grid-cols-[1fr_110px_90px_100px_90px_80px] gap-4 px-6 py-4 hover:bg-page/60 transition-colors cursor-pointer items-center"
               >
-                {/* Reference */}
                 <div className="flex items-center gap-3 min-w-0">
-                  <Truck className="w-4 h-4 text-txt-muted shrink-0 group-hover:text-brand transition-colors" />
+                  <Truck className="w-4 h-4 text-txt-muted shrink-0" />
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-txt truncate">
                       {t.externalReference || 'No reference'}
                     </p>
-                    <p className="text-[11px] text-txt-muted font-mono truncate">{t.id.slice(0, 12)}...</p>
+                    <p className="text-[11px] text-txt-muted font-mono truncate">
+                      {t.id.slice(0, 12)}
+                    </p>
                   </div>
-                  <ExternalLink className="w-3 h-3 text-txt-muted opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
                 </div>
 
-                {/* Status */}
-                <div>
-                  <StatusBadge kind="operational" status={t.operationalStatus} />
-                </div>
+                <StatusBadge kind="operational" status={t.operationalStatus} />
 
-                {/* Business status */}
-                <div>
-                  <StatusBadge kind="business" status={t.businessStatus} />
-                </div>
+                <StatusBadge kind="business" status={t.businessStatus} />
 
-                {/* Source */}
-                <div>
-                  <span className="text-xs font-mono text-txt-dim bg-raised px-2 py-1 rounded">
-                    {t.sourceSystem}
-                  </span>
-                </div>
+                <span className="text-xs font-mono text-txt-dim">{t.sourceSystem}</span>
 
-                {/* Updated */}
-                <div className="flex items-center gap-1.5 text-xs text-txt-muted">
+                <div className="flex items-center gap-1 text-xs text-txt-muted">
                   <Clock className="w-3 h-3" />
                   {timeAgo(t.updatedAt)}
                 </div>
 
-                {/* Dock */}
                 <div className="text-right">
-                  {t.assignedDockId ? (
-                    <span className="text-xs font-mono text-brand bg-brand/10 px-2 py-1 rounded">
-                      assigned
-                    </span>
-                  ) : t.suggestedDockId ? (
-                    <span className="text-xs font-mono text-status-waiting bg-status-waiting/10 px-2 py-1 rounded">
-                      suggested
-                    </span>
-                  ) : (
-                    <span className="text-xs text-txt-muted">—</span>
-                  )}
+                  <button className="px-3 py-1 text-xs font-medium text-primary bg-primary-soft rounded-lg hover:bg-primary/10 transition-colors">
+                    View
+                  </button>
                 </div>
               </div>
             ))}

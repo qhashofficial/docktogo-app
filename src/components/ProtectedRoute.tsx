@@ -7,10 +7,10 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-void flex items-center justify-center">
+      <div className="min-h-screen bg-page flex items-center justify-center">
         <div className="flex flex-col items-center gap-4 animate-fade-in">
-          <Loader2 className="w-8 h-8 text-brand animate-spin" />
-          <p className="text-txt-dim font-mono text-sm tracking-wider">LOADING SYSTEM</p>
+          <Loader2 className="w-7 h-7 text-primary animate-spin" />
+          <p className="text-txt-dim text-sm font-medium">Loading...</p>
         </div>
       </div>
     )

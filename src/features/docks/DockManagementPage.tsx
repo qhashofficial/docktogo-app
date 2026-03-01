@@ -62,10 +62,9 @@ export default function DockManagementPage() {
       )
 
       const assignedIds = new Set(
-        enriched.flatMap((d) => [
-          d.assigned?.id,
-          ...d.queue.map((q) => q.transportId),
-        ]).filter(Boolean),
+        enriched
+          .flatMap((d) => [d.assigned?.id, ...d.queue.map((q) => q.transportId)])
+          .filter(Boolean),
       )
 
       setDocks(enriched)
@@ -107,9 +106,9 @@ export default function DockManagementPage() {
 
   if (!activeBranch) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center animate-fade-in">
-          <AlertTriangle className="w-8 h-8 text-brand mx-auto mb-3" />
+      <div className="flex items-center justify-center h-64 animate-fade-in">
+        <div className="text-center">
+          <AlertTriangle className="w-8 h-8 text-warning mx-auto mb-3" />
           <p className="text-txt-dim text-sm">Select a branch to manage docks</p>
         </div>
       </div>
@@ -121,17 +120,14 @@ export default function DockManagementPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-3xl font-bold tracking-tight text-txt uppercase">
-            Dock Management
-          </h1>
-          <p className="text-txt-dim text-sm mt-1">
+          <p className="text-txt-dim text-sm">
             {docks.length} docks · {unassigned.length} unassigned transports
           </p>
         </div>
         <button
           onClick={handleRefresh}
           disabled={refreshing}
-          className="flex items-center gap-2 px-4 py-2 bg-raised border border-edge rounded-xl text-sm text-txt-dim hover:text-txt hover:border-edge-bright transition-all disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2 bg-card border border-edge rounded-xl text-sm text-txt-dim hover:text-txt hover:border-edge-strong transition-all disabled:opacity-50"
         >
           <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
           Refresh
@@ -140,24 +136,24 @@ export default function DockManagementPage() {
 
       {loading ? (
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="w-8 h-8 text-brand animate-spin" />
+          <Loader2 className="w-7 h-7 text-primary animate-spin" />
         </div>
       ) : (
-        <div className="flex gap-4 overflow-x-auto pb-4 -mx-6 px-6">
+        <div className="flex gap-5 overflow-x-auto pb-4 -mx-8 px-8">
           {/* Dock columns */}
           {docks.map((dock, i) => (
             <div
               key={dock.id}
-              className="flex-shrink-0 w-72 bg-panel border border-edge rounded-xl overflow-hidden"
-              style={{ animationDelay: `${i * 60}ms` }}
+              className="flex-shrink-0 w-72 bg-card border border-edge rounded-2xl overflow-hidden"
+              style={{ animationDelay: `${i * 50}ms` }}
             >
-              {/* Dock header */}
-              <div className="px-4 py-3 border-b border-edge flex items-center justify-between">
+              {/* Header */}
+              <div className="px-4 py-3.5 border-b border-edge flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <div
-                    className={`w-2 h-2 rounded-full ${
+                    className={`w-2.5 h-2.5 rounded-full ${
                       dock.status === 'AVAILABLE'
-                        ? 'bg-dock-available animate-pulse'
+                        ? 'bg-dock-available'
                         : dock.status === 'OCCUPIED'
                           ? 'bg-dock-occupied'
                           : dock.status === 'BLOCKED'
@@ -165,7 +161,7 @@ export default function DockManagementPage() {
                             : 'bg-dock-pending'
                     }`}
                   />
-                  <span className="font-display text-base font-bold text-txt uppercase tracking-wide">
+                  <span className="font-display text-sm font-semibold text-txt">
                     {dock.name}
                   </span>
                 </div>
@@ -173,16 +169,16 @@ export default function DockManagementPage() {
                   {dock.status === 'BLOCKED' || dock.status === 'BLOCKED_PENDING' ? (
                     <button
                       onClick={() => handleBlock(dock, false)}
-                      className="p-1.5 rounded-lg text-dock-blocked hover:bg-dock-blocked/10 transition-colors"
-                      title="Unblock dock"
+                      className="p-1.5 rounded-lg text-danger hover:bg-danger-soft transition-colors"
+                      title="Unblock"
                     >
                       <Unlock className="w-3.5 h-3.5" />
                     </button>
                   ) : (
                     <button
                       onClick={() => handleBlock(dock, true)}
-                      className="p-1.5 rounded-lg text-txt-muted hover:text-dock-blocked hover:bg-dock-blocked/10 transition-colors"
-                      title="Block dock"
+                      className="p-1.5 rounded-lg text-txt-muted hover:text-danger hover:bg-danger-soft transition-colors"
+                      title="Block"
                     >
                       <Lock className="w-3.5 h-3.5" />
                     </button>
@@ -193,25 +189,22 @@ export default function DockManagementPage() {
               <div className="p-3 space-y-3 min-h-[200px]">
                 {/* Assigned transport */}
                 {dock.assigned ? (
-                  <div className="bg-raised border border-brand/20 rounded-lg p-3 relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-brand/60 via-brand to-brand/60" />
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <Truck className="w-4 h-4 text-brand" />
-                        <span className="text-sm font-semibold text-txt">
-                          {dock.assigned.externalReference || dock.assigned.id.slice(0, 8)}
-                        </span>
-                      </div>
+                  <div className="bg-primary-soft border border-primary/15 rounded-xl p-3.5">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Truck className="w-4 h-4 text-primary" />
+                      <span className="text-sm font-semibold text-txt">
+                        {dock.assigned.externalReference || dock.assigned.id.slice(0, 8)}
+                      </span>
                     </div>
                     <StatusBadge kind="operational" status={dock.assigned.operationalStatus} />
-                    <div className="mt-2 text-[11px] text-txt-muted font-mono">
-                      {dock.assigned.sourceSystem} · {new Date(dock.assigned.updatedAt).toLocaleTimeString()}
-                    </div>
+                    <p className="mt-2 text-[11px] text-txt-muted font-mono">
+                      {dock.assigned.sourceSystem} · {new Date(dock.assigned.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </p>
                   </div>
                 ) : (
-                  <div className="border-2 border-dashed border-edge rounded-lg p-6 flex flex-col items-center justify-center text-txt-muted">
-                    <Container className="w-6 h-6 mb-2 opacity-30" />
-                    <span className="text-xs">No assignment</span>
+                  <div className="border-2 border-dashed border-edge rounded-xl p-8 flex flex-col items-center justify-center">
+                    <Container className="w-6 h-6 text-txt-placeholder mb-2" />
+                    <span className="text-xs text-txt-muted">No assignment</span>
                   </div>
                 )}
 
@@ -224,7 +217,7 @@ export default function DockManagementPage() {
                       </span>
                       <button
                         onClick={() => handlePromote(dock.id)}
-                        className="text-[11px] text-brand hover:text-brand-light flex items-center gap-1 transition-colors"
+                        className="text-[11px] text-primary hover:text-primary-dark font-medium flex items-center gap-1 transition-colors"
                       >
                         <ChevronUp className="w-3 h-3" />
                         Promote
@@ -234,7 +227,7 @@ export default function DockManagementPage() {
                       {dock.queue.map((entry, qi) => (
                         <div
                           key={entry.id}
-                          className="flex items-center gap-2.5 px-3 py-2 bg-raised rounded-lg border border-transparent hover:border-edge transition-colors"
+                          className="flex items-center gap-2.5 px-3 py-2 bg-page rounded-lg"
                         >
                           <span className="text-[11px] font-mono text-txt-muted w-4 text-center">
                             {qi + 1}
@@ -243,9 +236,6 @@ export default function DockManagementPage() {
                           <span className="text-xs text-txt font-medium truncate flex-1">
                             {entry.transport?.externalReference || entry.transportId.slice(0, 8)}
                           </span>
-                          {entry.transport && (
-                            <StatusBadge kind="operational" status={entry.transport.operationalStatus} />
-                          )}
                         </div>
                       ))}
                     </div>
@@ -255,11 +245,11 @@ export default function DockManagementPage() {
             </div>
           ))}
 
-          {/* Unassigned transports column */}
+          {/* Unassigned */}
           {unassigned.length > 0 && (
-            <div className="flex-shrink-0 w-72 bg-panel border border-edge border-dashed rounded-xl overflow-hidden">
-              <div className="px-4 py-3 border-b border-edge">
-                <span className="font-display text-base font-bold text-txt-dim uppercase tracking-wide">
+            <div className="flex-shrink-0 w-72 bg-card border border-dashed border-edge-strong rounded-2xl overflow-hidden">
+              <div className="px-4 py-3.5 border-b border-edge">
+                <span className="font-display text-sm font-semibold text-txt-dim">
                   Unassigned ({unassigned.length})
                 </span>
               </div>
@@ -267,9 +257,9 @@ export default function DockManagementPage() {
                 {unassigned.map((t) => (
                   <div
                     key={t.id}
-                    className="flex items-center gap-2.5 px-3 py-2.5 bg-raised rounded-lg border border-transparent hover:border-brand/30 transition-colors cursor-pointer group"
+                    className="flex items-center gap-2.5 px-3 py-2.5 bg-page rounded-lg hover:bg-primary-soft transition-colors cursor-pointer group"
                   >
-                    <Truck className="w-4 h-4 text-txt-muted group-hover:text-brand transition-colors" />
+                    <Truck className="w-4 h-4 text-txt-muted group-hover:text-primary transition-colors" />
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium text-txt truncate">
                         {t.externalReference || t.id.slice(0, 8)}

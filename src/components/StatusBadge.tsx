@@ -1,26 +1,26 @@
 import type { OperationalStatus, DockStatus, BusinessStatus } from '../types'
 
-const OP_COLORS: Record<OperationalStatus, { bg: string; text: string; dot: string }> = {
-  PLANNED: { bg: 'bg-status-planned/15', text: 'text-status-planned', dot: 'bg-status-planned' },
-  ARRIVING: { bg: 'bg-status-arriving/15', text: 'text-status-arriving', dot: 'bg-status-arriving' },
-  WAITING: { bg: 'bg-status-waiting/15', text: 'text-status-waiting', dot: 'bg-status-waiting' },
-  IN_PROCESS: { bg: 'bg-status-process/15', text: 'text-status-process', dot: 'bg-status-process' },
-  PAUSED: { bg: 'bg-status-paused/15', text: 'text-status-paused', dot: 'bg-status-paused' },
-  READY: { bg: 'bg-status-ready/15', text: 'text-status-ready', dot: 'bg-status-ready' },
-  COMPLETED: { bg: 'bg-status-completed/15', text: 'text-status-completed', dot: 'bg-status-completed' },
-  QUEUED: { bg: 'bg-status-queued/15', text: 'text-status-queued', dot: 'bg-status-queued' },
+const OP_STYLES: Record<OperationalStatus, string> = {
+  PLANNED: 'bg-status-planned/10 text-status-planned',
+  ARRIVING: 'bg-status-arriving/10 text-status-arriving',
+  WAITING: 'bg-status-waiting/10 text-status-waiting',
+  IN_PROCESS: 'bg-status-process/10 text-status-process',
+  PAUSED: 'bg-status-paused/10 text-status-paused',
+  READY: 'bg-status-ready/10 text-status-ready',
+  COMPLETED: 'bg-status-completed/10 text-status-completed',
+  QUEUED: 'bg-status-queued/10 text-status-queued',
 }
 
-const DOCK_COLORS: Record<DockStatus, { bg: string; text: string; dot: string }> = {
-  AVAILABLE: { bg: 'bg-dock-available/15', text: 'text-dock-available', dot: 'bg-dock-available' },
-  OCCUPIED: { bg: 'bg-dock-occupied/15', text: 'text-dock-occupied', dot: 'bg-dock-occupied' },
-  BLOCKED_PENDING: { bg: 'bg-dock-pending/15', text: 'text-dock-pending', dot: 'bg-dock-pending' },
-  BLOCKED: { bg: 'bg-dock-blocked/15', text: 'text-dock-blocked', dot: 'bg-dock-blocked' },
+const DOCK_STYLES: Record<DockStatus, string> = {
+  AVAILABLE: 'bg-dock-available/10 text-dock-available',
+  OCCUPIED: 'bg-dock-occupied/10 text-dock-occupied',
+  BLOCKED_PENDING: 'bg-dock-pending/10 text-dock-pending',
+  BLOCKED: 'bg-dock-blocked/10 text-dock-blocked',
 }
 
-const BIZ_COLORS: Record<BusinessStatus, { bg: string; text: string; dot: string }> = {
-  ACTIVE: { bg: 'bg-dock-available/15', text: 'text-dock-available', dot: 'bg-dock-available' },
-  CANCELED: { bg: 'bg-status-canceled/15', text: 'text-status-canceled', dot: 'bg-status-canceled' },
+const BIZ_STYLES: Record<BusinessStatus, string> = {
+  ACTIVE: 'bg-success/10 text-success',
+  CANCELED: 'bg-danger/10 text-danger',
 }
 
 type BadgeVariant =
@@ -29,20 +29,17 @@ type BadgeVariant =
   | { kind: 'business'; status: BusinessStatus }
 
 export default function StatusBadge(props: BadgeVariant) {
-  const colors =
+  const style =
     props.kind === 'operational'
-      ? OP_COLORS[props.status]
+      ? OP_STYLES[props.status]
       : props.kind === 'dock'
-        ? DOCK_COLORS[props.status]
-        : BIZ_COLORS[props.status]
+        ? DOCK_STYLES[props.status]
+        : BIZ_STYLES[props.status]
 
   const label = props.status.replace(/_/g, ' ')
 
   return (
-    <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium font-mono tracking-wide ${colors.bg} ${colors.text}`}
-    >
-      <span className={`w-1.5 h-1.5 rounded-full ${colors.dot}`} />
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wide ${style}`}>
       {label}
     </span>
   )
